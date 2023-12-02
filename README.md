@@ -22,14 +22,15 @@ machine instructions.
 
 Optional:
 * It is recommended to use the [xdot](https://github.com/jrfonseca/xdot.py#readme) program to view the abstract syntax tree. If `xdot` isn't available, the PDF viewer `evince` is used as a fallback.
+* The `git` command is used by test.sh.
 
 ### Fedora
 
-	dnf install -y python-ply python-xdot evince
+	dnf install -y python-ply python-xdot evince git
 
 ### Debian/Ubuntu
 
-	apt update && apt install -y python-is-python3 python3-ply
+	apt update && apt install -y python-is-python3 python3-ply git
 
 ### Unix-based
 
