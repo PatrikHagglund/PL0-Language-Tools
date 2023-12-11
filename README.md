@@ -23,14 +23,15 @@ machine instructions.
 Optional:
 * It is recommended to use the [xdot](https://github.com/jrfonseca/xdot.py#readme) program to view the abstract syntax tree. If `xdot` isn't available, the PDF viewer `evince` is used as a fallback.
 * The `git` command is used by test.sh.
+* `gforth` is used as an alternative virtual machine/compiler target.
 
 ### Fedora
 
-	dnf install -y python-ply python-xdot evince git
+	dnf install -y python-ply python-xdot evince git gforth
 
 ### Debian/Ubuntu
 
-	apt update && apt install -y python-is-python3 python3-ply git
+	apt update && apt install -y python-is-python3 python3-ply git gforth
 
 ### Unix-based
 
@@ -119,17 +120,18 @@ To get a graphical view of the abstract syntax tree:
 
 For more advanced usage, including documentation on individual components, please see the [online documentation](http://programming.dojo.net.nz/study/pl0-language-tools/index).
 
-## Cross Compiling
+## Alternative compiler targets
 
-Recent development adds several new compiler targets. I'm interested in the possibility of cross compiling PL/0 to other languages; most of my work on this targets this.
+The alternative compiler implementation pl0_compiler_forth.py targets [Forth](https://forth-standard.org/) as its virtual machine. Contributed by Charles Childers and Michal J Wallace.
 
-I (Charles) am working on cross compilers for several stack based languages, including Retro, Parable, and ANS FORTH.
+	python pl0_compiler_forth.py < examples/fibonacci.pl0 | gforth
 
 ## License
 
 Copyright, 2012, by Samuel G. D. Williams. <http://www.codeotaku.com>  
 Copyright, 2012, by Michal J Wallace. <http://www.michaljwallace.com/>  
 Copyright, 2012, 2016, 2017 by Charles Childers <http://forthworks.com/>  
+Copyright, 2023 by Patrik Hägglund <https://github.com/PatrikHagglund>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

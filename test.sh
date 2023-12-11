@@ -25,21 +25,11 @@ git restore expect
 #(sleep 1; mv graph.dot expect/fibonacci.dot; rm -f graph.pdf) &
 
 ### Run all examples using the interpreter, compiler, and the alternative compiler to Forth.
-for f in examples/*.pl0 tests/*.pl0; do
+for f in examples/*.pl0; do
   : $f
   ./pl0_interpreter.py < $f
   ./pl0_compiler.py < $f | ./pl0_assembler.py | ./pl0_machine.py
-  ./pl0_ansforth.py < $f | gforth
-done
-
-## Retro Forth 11 backend tests.
-for f in tests/*.pl0 ; do
-  # Strip the path and extension.
-  name="$(basename $f)" # Remove the directory prefix.
-  name="${name%.pl0}"   # Remove the '.pl0' suffix.
-
-  # Run the file through the retro compiler.
-  ./pl0_retro11.py $f > expect/retro11/$name.rx
+  ./pl0_compiler_forth.py < $f | gforth
 done
 
 # Check changes in the generated output.
