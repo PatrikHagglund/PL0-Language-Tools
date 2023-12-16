@@ -20,55 +20,49 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-
+
 import sys
-
+
 OPCODES = {
-    'NOP': 0,
-    'HALT': 1,
-
-    'LOAD': 6,
-    'SAVE': 7,
-
-    'PUSH': 10,
-    'POP': 11,
-    'DUP': 12,
-
-    'JMP': 16,
-    'CALL': 17,
-    'RET': 18,
-
-    'JLT': 20,
-    'JLTE': 21,
-    'JE': 22,
-    'JNE': 23,
-    'JGTE': 24,
-    'JGT': 25,
-
+    "NOP": 0,
+    "HALT": 1,
+    "LOAD": 6,
+    "SAVE": 7,
+    "PUSH": 10,
+    "POP": 11,
+    "DUP": 12,
+    "JMP": 16,
+    "CALL": 17,
+    "RET": 18,
+    "JLT": 20,
+    "JLTE": 21,
+    "JE": 22,
+    "JNE": 23,
+    "JGTE": 24,
+    "JGT": 25,
     # These instructions are more natural for stack-based machines.
-    'CMPLT': 30,
-    'CMPLTE': 31,
-    'CMPE': 32,
-    'CMPNE': 33,
-    'CMPGTE': 34,
-    'CMPGT': 35,
-
-    'MUL': 43,
-    'DIV': 44,
-    'ADD': 45,
-    'SUB': 46,
-
-    'PRINT': 50,
-    'DEBUG': 51
+    "CMPLT": 30,
+    "CMPLTE": 31,
+    "CMPE": 32,
+    "CMPNE": 33,
+    "CMPGTE": 34,
+    "CMPGT": 35,
+    "MUL": 43,
+    "DIV": 44,
+    "ADD": 45,
+    "SUB": 46,
+    "PRINT": 50,
+    "DEBUG": 51,
 }
 
-NAMES = dict((v,k) for k, v in OPCODES.items())
-
+NAMES = dict((v, k) for k, v in OPCODES.items())
+
 # Set global name for each opcode
 module = sys.modules[__name__]
 for name, value in OPCODES.items():
     setattr(module, name, value)
-
+
+
 class Machine:
     def __init__(self, sequence):
         self.offset = 0
@@ -95,7 +89,7 @@ class Machine:
 
     def instruction_halt(self):
         self.offset = -1
-
+
     # Basic absolute address load/save unit
     def instruction_load(self):
         self.offset += 1
@@ -108,7 +102,7 @@ class Machine:
         address = self.sequence[self.offset]
         self.sequence[address] = self.stack.pop()
         self.offset += 1
-
+
     # Basic stack manipulation
     def instruction_push(self):
         self.offset += 1
@@ -137,7 +131,7 @@ class Machine:
     def instruction_ret(self):
         address = self.stack.pop()
         self.offset = address
-
+
     # Jump based on the result of a subtraction
     def instruction_jlt(self):
         self.offset += 1
@@ -165,7 +159,7 @@ class Machine:
 
         if value == 0:
             self.offset = address
-
+
     def instruction_jne(self):
         self.offset += 1
         address = self.sequence[self.offset]
@@ -192,7 +186,7 @@ class Machine:
 
         if value < 0:
             self.offset = address
-
+
     # Basic comparision support
     def instruction_cmplt(self):
         self.offset += 1
@@ -229,7 +223,7 @@ class Machine:
         b = self.stack.pop()
         a = self.stack.pop()
         self.stack.append(int(a >= b))
-
+
     # Basic arithmetic
     def instruction_mul(self):
         self.offset += 1
@@ -260,8 +254,9 @@ class Machine:
         print("Sequence: " + repr(self.sequence))
         print("Stack: " + repr(self.stack))
         print("Offset: " + repr(self.offset))
-
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     buffer = sys.stdin.read()
     code = eval(buffer)
     machine = Machine(code)

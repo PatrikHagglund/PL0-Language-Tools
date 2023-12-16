@@ -20,23 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-
+
 from pl0_node_visitor import StackingNodeVisitor
 import sys
 import pl0_parser
 import io
 import os
-
-GraphHeader = '''
+
+GraphHeader = """
 digraph finite_state_machine {
 	rankdir=TB;
 	size="8,5"
-'''
+"""
 
-GraphFooter = '''
+GraphFooter = """
 }
-'''
-
+"""
+
+
 class GraphPrinter(StackingNodeVisitor):
     def __init__(self):
         super(GraphPrinter, self).__init__()
@@ -45,16 +46,19 @@ class GraphPrinter(StackingNodeVisitor):
         self.nodes = {}
         self.procedures = {}
 
-    #override
+    # override
     def _invoke_method(self, meth, node):
         return meth(node)
 
-    #override
+    # override
     def push(self, node):
         self.stack.append(node)
 
         if id(node) not in self.nodes:
-            self.nodes[id(node)] = "%s_%d" % (node[0], self.next,)
+            self.nodes[id(node)] = "%s_%d" % (
+                node[0],
+                self.next,
+            )
             self.next += 1
 
         return self.nodes[id(node)]
@@ -75,11 +79,16 @@ class GraphPrinter(StackingNodeVisitor):
         self.buf = None
 
         return contents
-
+
     def accept_program(self, node):
         node_id = self.push(node)
-        self.buf.write("\tnode [shape=doublecircle,label=\"%s\",color=green]; %s;\n"
-                       % (node[0], node_id,))
+        self.buf.write(
+            '\tnode [shape=doublecircle,label="%s",color=green]; %s;\n'
+            % (
+                node[0],
+                node_id,
+            )
+        )
         self.visit_children(node)
         self.pop()
 
@@ -89,8 +98,14 @@ class GraphPrinter(StackingNodeVisitor):
     def accept_node(self, node):
         node_id = self.push(node)
         parent_id = self.parent_id()
-        self.buf.write("\tnode [shape=circle,label=\"%s\",color=black]; %s -> %s;\n"
-                       % (node[0], parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=circle,label="%s",color=black]; %s -> %s;\n'
+            % (
+                node[0],
+                parent_id,
+                node_id,
+            )
+        )
         self.visit_children(node)
         self.pop()
 
@@ -98,62 +113,104 @@ class GraphPrinter(StackingNodeVisitor):
         node_id = self.push(node)
         parent_id = self.parent_id()
         label = "%s = %d" % node[1:]
-        self.buf.write("\tnode [shape=circle,label=\"%s\",color=black]; %s -> %s;\n"
-                       % (label, parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=circle,label="%s",color=black]; %s -> %s;\n'
+            % (
+                label,
+                parent_id,
+                node_id,
+            )
+        )
         self.visit_children(node)
         self.pop()
-
+
     def accept_condition(self, node):
         node_id = self.push(node)
         parent_id = self.parent_id()
-        self.buf.write("\tnode [shape=diamond,label=\"%s\",color=orange]; %s -> %s;\n"
-                       % (node[2], parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=diamond,label="%s",color=orange]; %s -> %s;\n'
+            % (
+                node[2],
+                parent_id,
+                node_id,
+            )
+        )
         self.visit_children(node)
         self.pop()
 
     def accept_name(self, node):
         node_id = self.push(node)
         parent_id = self.parent_id()
-        self.buf.write("\tnode [shape=square,label=\"%s\",color=blue]; %s -> %s;\n"
-                       % (node[1], parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=square,label="%s",color=blue]; %s -> %s;\n'
+            % (
+                node[1],
+                parent_id,
+                node_id,
+            )
+        )
         self.pop()
-
+
     def accept_number(self, node):
         node_id = self.push(node)
         parent_id = self.parent_id()
-        self.buf.write("\tnode [shape=square,label=\"%d\",color=blue]; %s -> %s;\n"
-                       % (node[1], parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=square,label="%d",color=blue]; %s -> %s;\n'
+            % (
+                node[1],
+                parent_id,
+                node_id,
+            )
+        )
         self.pop()
 
     def accept_procedure(self, node):
         node_id = self.push(node)
         self.procedures[node[1]] = node_id
         parent_id = self.parent_id()
-        self.buf.write("\tnode [shape=trapezium,label=\"%s\",color=purple]; %s -> %s;\n"
-                       % (node[1], parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=trapezium,label="%s",color=purple]; %s -> %s;\n'
+            % (
+                node[1],
+                parent_id,
+                node_id,
+            )
+        )
         self.visit_children(node)
         self.pop()
 
     def accept_expression(self, node):
         node_id = self.push(node)
         parent_id = self.parent_id()
-        self.buf.write("\tnode [shape=circle,label=\"EXPR\",color=blue]; %s -> %s;\n"
-                       % (parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=circle,label="EXPR",color=blue]; %s -> %s;\n'
+            % (
+                parent_id,
+                node_id,
+            )
+        )
         self.visit_children(node)
         self.pop()
-
+
     def accept_call(self, node):
         node_id = self.push(node)
         parent_id = self.parent_id()
         label = "CALL |{%s}" % node[1]
-        self.buf.write("\tnode [shape=record,label=\"%s\",color=purple]; %s -> %s;\n"
-                       % (label, parent_id, node_id,))
+        self.buf.write(
+            '\tnode [shape=record,label="%s",color=purple]; %s -> %s;\n'
+            % (
+                label,
+                parent_id,
+                node_id,
+            )
+        )
         self.pop()
 
     def accept_term(self, node):
         self.visit_children(node)
-
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     code = sys.stdin.read()
     parser = pl0_parser.Parser()
     parser.input(code)
@@ -163,11 +220,11 @@ if __name__ == '__main__':
     contents = visitor.generate_graph(program)
 
     print("Generating Graph...")
-    with open('graph.dot', 'w') as f:
+    with open("graph.dot", "w") as f:
         f.write(contents)
 
     # To view, use 'xdot' if available, else the PDF viewer 'evince'.
-    if (os.system("xdot graph.dot") >> 8):
+    if os.system("xdot graph.dot") >> 8:
         print("Generating PDF...")
         os.system("dot -T pdf -o graph.pdf graph.dot")
         os.system("evince graph.pdf")

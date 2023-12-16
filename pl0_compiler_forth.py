@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-
+
 """
 This translates the pl0 syntax tree to the equivalent
 representation in retroforth ( http://retroforth.org/ )
@@ -30,32 +30,31 @@ from pl0_node_visitor import StackingNodeVisitor
 import sys
 import pl0_parser
 import types
-
+
 # AST->retro translator for operators
 ops = {
-    'DIVIDE' : '/',   # integer div
-    'MODULO' : 'mod',
-    'TIMES'  : '*',
-    'PLUS'   : '+',
-    'MINUS'  : '-',
+    "DIVIDE": "/",  # integer div
+    "MODULO": "mod",
+    "TIMES": "*",
+    "PLUS": "+",
+    "MINUS": "-",
 }
 
 rel_ops = {
-    'LT'     : '<',
-    'LTE'    : '<=',
-    'GT'     : '>',
-    'GTE'    : '>=',
-    'E'      : '=',
-    'NE'     : '<>',
+    "LT": "<",
+    "LTE": "<=",
+    "GT": ">",
+    "GTE": ">=",
+    "E": "=",
+    "NE": "<>",
 }
 
 UNKNOWN, VAR, CONST, PROCEDURE = list(range(4))
 CATEGORY = "UNKNOWN VAR CONST PROCEDURE".split()
 
-
-class RetroTranspiler(StackingNodeVisitor):
 
-    stacksize = 256 # cells
+class RetroTranspiler(StackingNodeVisitor):
+    stacksize = 256  # cells
 
     def __init__(self):
         super(RetroTranspiler, self)
@@ -72,9 +71,9 @@ class RetroTranspiler(StackingNodeVisitor):
         # literal by -1.
         self.negate = False
         self.name_op = "@"
-        self.proc_path = []    # for nested procedure defs
-        self.local_defs = {}   # symbol table for top level / current proc
-        self.scope = []        # list of symbol tables for lexical scope
+        self.proc_path = []  # for nested procedure defs
+        self.local_defs = {}  # symbol table for top level / current proc
+        self.scope = []  # list of symbol tables for lexical scope
         self.scope.append(self.local_defs)
 
     def local_vars(self):
@@ -82,60 +81,60 @@ class RetroTranspiler(StackingNodeVisitor):
         returns a list of names of variables to preserve
         when calling functions recursively
         """
-        return [ key for (key, (kind, _)) in list(self.local_defs.items())
-                 if kind == VAR ]
+        return [
+            key for (key, (kind, _)) in list(self.local_defs.items()) if kind == VAR
+        ]
 
     def lookup(self, name):
-        for frame in reversed( self.scope ):
-            if name in frame :
-                return frame[ name ]
+        for frame in reversed(self.scope):
+            if name in frame:
+                return frame[name]
             else:
                 pass
         else:
-            raise LookupError( "name not found: %s. scope is %r"
-                                 % ( name, self.scope ))
+            raise LookupError("name not found: %s. scope is %r" % (name, self.scope))
 
-    def visit( self, node ):
+    def visit(self, node):
         """like visit_node but works with generators"""
-        result = self.visit_node( node )
-        if isinstance( result, types.GeneratorType ):
-            result = "\n".join( result )
+        result = self.visit_node(node)
+        if isinstance(result, types.GeneratorType):
+            result = "\n".join(result)
         return result
-
-    #-- simple numbers -----------------
+
+    # -- simple numbers -----------------
 
     def accept_number(self, nid, value):
         if self.negate:
-            print("-{0}".format(value), end=' ')
+            print("-{0}".format(value), end=" ")
             self.negate = False
         else:
             sys.stdout.write(" ")
-            print(value, end=' ')
+            print(value, end=" ")
 
     # logically, print ("!") would come much later
     # but i'm putting these in implementation order,
     # and i want this up front so i can see the
     # results of running the code.
     def accept_print(self, nid, expr):
-        self.visit( expr )
-        print(' . ', end=' ')
-
-    #-- expressions --------------------
+        self.visit(expr)
+        print(" . ", end=" ")
+
+    # -- expressions --------------------
 
     # example: a + b * c + d * e + f
     # becomes: a b c * + d e * + f +
 
     # term = factor {("*"|"/") factor}.
-    def accept_term( self, nid, *factors_tup ):
-        factors = list( factors_tup )
-        self.visit( factors.pop( 0 ))
+    def accept_term(self, nid, *factors_tup):
+        factors = list(factors_tup)
+        self.visit(factors.pop(0))
         for operator, operand in factors:
-            self.visit( operand )
-            print(ops[ operator ], end=' ')
+            self.visit(operand)
+            print(ops[operator], end=" ")
 
     # expression = [ "+"|"-"] term { ("+"|"-") term}.
     def accept_expression(self, nid, sign, *terms_tup):
-        terms = list( terms_tup )
+        terms = list(terms_tup)
 
         # handle negative numbers and unary minus
         negate_after = False
@@ -148,69 +147,68 @@ class RetroTranspiler(StackingNodeVisitor):
 
         # generate the normal expression
         for node in terms:
-            if node[0]=="TERM":
+            if node[0] == "TERM":
                 self.visit(node)
             else:
                 operator, term = node
-                self.visit( term )
-                print(ops[ operator ], end=' ')
+                self.visit(term)
+                print(ops[operator], end=" ")
 
         if negate_after:
-            print("-1 *", end=' ')
-
-    #-- named constants ----------------
+            print("-1 *", end=" ")
+
+    # -- named constants ----------------
 
     def accept_define(self, nid, name, value):
-        self.local_defs[ name ] = (CONST, value)
+        self.local_defs[name] = (CONST, value)
 
     def accept_name(self, nid, name):
-        category, value = self.lookup( name )
+        category, value = self.lookup(name)
         if category == CONST:
             sys.stdout.write(" {0} ".format(value))
         elif category == VAR:
-            sys.stdout.write(' ')
+            sys.stdout.write(" ")
             sys.stdout.write(value)
-            sys.stdout.write(' ')
+            sys.stdout.write(" ")
             sys.stdout.write(self.name_op)
-            sys.stdout.write(' ')
+            sys.stdout.write(" ")
         else:
-            raise Exception("unhandled name: (%s:%s) . scope is: %r"
-                            % [CATEGORY[category], value,
-                               self.scope])
+            raise Exception(
+                "unhandled name: (%s:%s) . scope is: %r"
+                % [CATEGORY[category], value, self.scope]
+            )
 
-
-    #-- named variables & assignment ---
+    # -- named variables & assignment ---
 
     def accept_variables(self, nid, *names):
         for nid, name in names:
-            print("variable " + name + "\n", end=' ')
-            self.local_defs[ name ] = (VAR, name)
+            print("variable " + name + "\n", end=" ")
+            self.local_defs[name] = (VAR, name)
 
     def accept_set(self, nid, name, expr):
-        self.visit( expr )
+        self.visit(expr)
         self.name_op = "!"
-        self.visit( name )
+        self.visit(name)
         self.name_op = "@"
 
-
-    #-- flow control -------------------
+    # -- flow control -------------------
 
     def accept_odd(self, nid, expr):
-        self.visit( expr )
-        print("2 mod 1 =", end=' ')
+        self.visit(expr)
+        print("2 mod 1 =", end=" ")
 
     def accept_condition(self, nid, lhs, rel, rhs):
-        self.visit( lhs )
-        self.visit( rhs )
-        sys.stdout.write(' ' + rel_ops[ rel ] + ' ')
+        self.visit(lhs)
+        self.visit(rhs)
+        sys.stdout.write(" " + rel_ops[rel] + " ")
 
     def accept_if(self, nid, cond, stmt):
         # retro's quotations ([..]) are high level functional constructs.
         # they are nice, but incur a small extra runtime overhead.
-        # TODO: go back and use plain old jumps for speed
-        self.visit( cond )
+        # TODO: go back and use plain old jumps for speed
+        self.visit(cond)
         sys.stdout.write(" if ")
-        self.visit( stmt )
+        self.visit(stmt)
         sys.stdout.write(" then ")
 
     def accept_while(self, nid, cond, stmt):
@@ -226,18 +224,16 @@ class RetroTranspiler(StackingNodeVisitor):
         #
         #    <cond> [ [ <stmt> <cond> ] while ] ifTrue
         #
-        # TODO: lower level/faster WHILE implementation
-        print(" begin ", end=' ')
-        self.visit( cond )
-        print(" while ", end=' ')
-        self.visit( stmt )
-        print(" repeat ", end=' ')
+        # TODO: lower level/faster WHILE implementation
+        print(" begin ", end=" ")
+        self.visit(cond)
+        print(" while ", end=" ")
+        self.visit(stmt)
+        print(" repeat ", end=" ")
 
-
-    #-- procedures ---------------------
+    # -- procedures ---------------------
 
     def accept_program(self, nid, block):
-
         (blocknid, procs, consts, vars, stmt) = block
         self.visit_expressions([procs, consts, vars])
         sys.stdout.write(": run ")
@@ -246,10 +242,8 @@ class RetroTranspiler(StackingNodeVisitor):
 
         print("run\n")
 
-
     # for recursion, we need to maintain a stack
     def accept_procedure(self, nid, name, block):
-
         (blocknid, procs, consts, vars, stmt) = block
         self.proc_path.append(name)
         self.scope.append(self.local_defs)
@@ -263,27 +257,28 @@ class RetroTranspiler(StackingNodeVisitor):
         self.local_defs = self.scope[-1]
 
     def accept_call(self, nid, name):
-
         # this detects simple recursion
-        #TODO: full recursion check
-        #TODO: tail call optimization
-        #TODO: only push/pop shadowed variables
+        # TODO: full recursion check
+        # TODO: tail call optimization
+        # TODO: only push/pop shadowed variables
         recursive = name in self.proc_path
 
-        def call(): print(name, end=' ')
+        def call():
+            print(name, end=" ")
 
         keep = self.local_vars()
 
         if recursive:
             for ident in keep:
-                 sys.stdout.write(ident + ' @ ')
-            print(" recurse ", end=' ')
-            for ident in reversed( keep ):
-                 sys.stdout.write(ident + ' ! ')
+                sys.stdout.write(ident + " @ ")
+            print(" recurse ", end=" ")
+            for ident in reversed(keep):
+                sys.stdout.write(ident + " ! ")
         else:
             call()
-
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     code = sys.stdin.read()
     parser = pl0_parser.Parser()
     parser.input(code)

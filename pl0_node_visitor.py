@@ -19,15 +19,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-
-class NodeVisitor(object):
 
+
+class NodeVisitor(object):
     def visit_node(self, node):
         if node is None:
             return None
 
-        m = getattr(self, "accept_%s" % node[0].lower(),
-                    self.accept_node)
+        m = getattr(self, "accept_%s" % node[0].lower(), self.accept_node)
         return self._invoke_method(m, node)
 
     def _invoke_method(self, meth, node):
@@ -40,7 +39,7 @@ class NodeVisitor(object):
         on id(*node), so we have to allow overriding this to pass
         the actual object.
 
-        NOTE: The graphviz issue could be fixed by moving the
+        NOTE: The graphviz issue could be fixed by moving the
         symbol name generator up into the parser, so that it always
         generates a uinque node id. ("BLOCK:0" or ("BLOCK",0) instead
         of just "BLOCK").
@@ -71,11 +70,11 @@ class NodeVisitor(object):
         else:
             return results
 
-
+
 class Block:
     def __init__(self):
         self.constants = {}
-        self.variables  = {}
+        self.variables = {}
         self.procedures = {}
 
     def define(self, name, value):
@@ -96,16 +95,28 @@ class Block:
 
     def lookup(self, name):
         if name in self.constants:
-            return ('CONSTANT', self.constants[name],)
+            return (
+                "CONSTANT",
+                self.constants[name],
+            )
         elif name in self.variables:
-            return ('VARIABLE', self.variables[name],)
+            return (
+                "VARIABLE",
+                self.variables[name],
+            )
         elif name in self.procedures:
-            return ('PROCEDURE', self.procedures[name],)
+            return (
+                "PROCEDURE",
+                self.procedures[name],
+            )
         else:
-            return (False, None,)
-
-class StackingNodeVisitor(NodeVisitor):
+            return (
+                False,
+                None,
+            )
 
+
+class StackingNodeVisitor(NodeVisitor):
     def __init__(self):
         self.stack = []
 
@@ -120,6 +131,10 @@ class StackingNodeVisitor(NodeVisitor):
             defined, value = self.stack[-x].lookup(name)
 
             if defined:
-                return (defined, value, -x,)
+                return (
+                    defined,
+                    value,
+                    -x,
+                )
 
         raise NameError("Undefined name referenced: " + repr(name))
