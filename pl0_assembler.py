@@ -23,7 +23,6 @@
 
 import pl0_machine
 import sys
-import io
 import re
 
 label_re = re.compile(r'\s*(.*?):')

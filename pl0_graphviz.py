@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 #
 
-from pl0_node_visitor import *
+from pl0_node_visitor import StackingNodeVisitor
 import sys
 import pl0_parser
 import io
@@ -145,7 +145,6 @@ class GraphPrinter(StackingNodeVisitor):
     def accept_call(self, node):
         node_id = self.push(node)
         parent_id = self.parent_id()
-        proc_id = self.procedures[node[1]]
         label = "CALL |{%s}" % node[1]
         self.buf.write("\tnode [shape=record,label=\"%s\",color=purple]; %s -> %s;\n"
                        % (label, parent_id, node_id,))

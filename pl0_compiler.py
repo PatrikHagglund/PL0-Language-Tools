@@ -21,9 +21,7 @@
 # THE SOFTWARE.
 #
 
-import os
 import sys
-import io
 import pl0_parser
 from pl0_node_visitor import StackingNodeVisitor
 
@@ -134,8 +132,6 @@ class Compiler(StackingNodeVisitor):
         print("\tCMP" + operator)
 
     def accept_set(self, *node):
-        name = node[1][1]
-
         self.visit_node(node[2])
 
         assign_to = node[1][1]

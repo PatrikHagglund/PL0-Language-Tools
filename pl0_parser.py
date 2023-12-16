@@ -385,7 +385,7 @@ class Parser(SymbolParser):
             return expression
 
 def is_flat(tree):
-    if tree == None:
+    if tree is None:
         return False
 
     for val in tree:
@@ -396,15 +396,15 @@ def is_flat(tree):
 def print_tree(tree, depth = 0):
     if is_flat(tree):
         print("  " * depth + str(tree))
-    elif type(tree) == list or type(tree) == tuple:
+    elif isinstance(tree, list) or isinstance(tree, tuple):
         print_tree(tree[0], depth)
         for val in tree[1:]:
             print_tree(val, depth+1)
-    elif type(tree) == dict:
+    elif isinstance(tree, dict):
         for key, val in tree.items():
             print("  " * depth + str(key))
             print_tree(val, depth+1)
-    elif tree == None:
+    elif tree is None:
         pass
     else:
         print("  " * depth + str(tree))

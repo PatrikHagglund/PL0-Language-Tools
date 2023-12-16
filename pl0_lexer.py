@@ -126,6 +126,7 @@ if __name__ == "__main__":
 
     while True:
         tok = lex.token()
-        if not tok: break
+        if not tok:
+            break
 
         print(tok)

@@ -21,9 +21,7 @@
 # THE SOFTWARE.
 #
 
-import os
 import sys
-import io
 import pl0_parser
 from pl0_node_visitor import StackingNodeVisitor
 
@@ -146,7 +144,7 @@ class Interpreter(StackingNodeVisitor):
                 total = total - result
 
         if node[1] == 'MINUS':
-            total = total * -1;
+            total = total * -1
 
         return total
 

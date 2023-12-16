@@ -29,8 +29,6 @@ representation in retroforth ( http://retroforth.org/ )
 from pl0_node_visitor import StackingNodeVisitor
 import sys
 import pl0_parser
-import io
-import os
 import types
 
 # AST->retro translator for operators
@@ -91,8 +89,10 @@ class RetroTranspiler(StackingNodeVisitor):
         for frame in reversed( self.scope ):
             if name in frame :
                 return frame[ name ]
-            else: pass
-        else: raise LookupError( "name not found: %s. scope is %r"
+            else:
+                pass
+        else:
+            raise LookupError( "name not found: %s. scope is %r"
                                  % ( name, self.scope ))
 
     def visit( self, node ):
@@ -138,7 +138,6 @@ class RetroTranspiler(StackingNodeVisitor):
         terms = list( terms_tup )
 
         # handle negative numbers and unary minus
-        negate_value = False
         negate_after = False
         if sign == "MINUS":
             assert len(terms_tup) == 1
