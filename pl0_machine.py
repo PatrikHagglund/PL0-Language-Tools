@@ -231,7 +231,9 @@ class Machine:
 
     def instruction_div(self):
         self.offset += 1
-        self.stack.append(self.stack.pop() / self.stack.pop())
+        tmp = self.stack.pop()
+        # For simplicity, use floor division instead of truncate towards zero.
+        self.stack.append(self.stack.pop() // tmp)
 
     def instruction_add(self):
         self.offset += 1
@@ -239,7 +241,8 @@ class Machine:
 
     def instruction_sub(self):
         self.offset += 1
-        self.stack.append(self.stack.pop() - self.stack.pop())
+        tmp = self.stack.pop()
+        self.stack.append(self.stack.pop() - tmp)
 
     def instruction_print(self):
         self.offset += 1

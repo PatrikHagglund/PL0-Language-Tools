@@ -128,8 +128,9 @@ class Interpreter(StackingNodeVisitor):
 
             if term[0] == "TIMES":
                 total = total * result
-            elif term[0] == "DIVIDES":
-                total = total / result
+            elif term[0] == "DIVIDE":
+                # For simplicity, use floor division instead of truncate towards zero.
+                total = total // result
 
         return total
 

@@ -163,7 +163,7 @@ class Compiler(StackingNodeVisitor):
 
             if term[0] == "TIMES":
                 print("\tMUL")
-            elif term[0] == "DIVIDES":
+            elif term[0] == "DIVIDE":
                 print("\tDIV")
 
     def accept_expression(self, *node):
