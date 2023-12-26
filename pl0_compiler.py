@@ -121,6 +121,15 @@ class Compiler(StackingNodeVisitor):
 
         print(false_label + ":")
 
+    def accept_odd(self, nid, expr):
+        self.visit_node(expr)
+        print("\tDUP")
+        print("\tPUSH 2")
+        print("\tDIV")
+        print("\tPUSH 2")
+        print("\tMUL")
+        print("\tSUB")
+
     def accept_condition(self, *node):
         operator = node[2]
         lhs = node[1]
